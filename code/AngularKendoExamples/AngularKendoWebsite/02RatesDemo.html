@@ -1,0 +1,101 @@
+﻿<!DOCTYPE html>
+<html>
+    <head>
+        <title>Rates Demo</title>
+        <link rel="stylesheet" href="kendo-ui-pro-trial/styles/kendo.common.min.css" />
+        <link rel="stylesheet" href="kendo-ui-pro-trial/styles/kendo.default.min.css" />
+        <link rel="stylesheet" href="content/bootstrap.min.css" />
+
+        <script src="kendo-ui-pro-trial/js/jquery.min.js"></script>
+        <script src="kendo-ui-pro-trial/js/angular.min.js"></script>
+        <script src="kendo-ui-pro-trial/js/kendo.all.min.js"></script>
+        <script src="kendo-ui-pro-trial/js/kendo.angular.min.js"></script>
+    </head>
+    <body>
+        <div ng-app="rateApp" class="container">
+            <div ng-if="false===true">Angular is not working.</div>
+            <div class="h2">Rates</div>
+            <hr />
+            <div class="container" ng-controller="rateCtrl as ctrl">
+                <div kendo-grid options="ctrl.gridOptions"></div>
+            </div>
+        </div>
+
+        <script>
+
+            "use strict";
+
+            (function(app) {
+
+                app.value('hours', [40, 45, 50]);
+
+                app.value('times', [
+                    {
+                        time: 'Weekly',
+                        factor: 1
+                    }, {
+                        time: 'Monthly',
+                        factor: 4
+                    }, {
+                        time: 'Yearly (48 Weeks)',
+                        factor: 48
+                    }
+                ]);
+
+                (function() {
+                    var rates = [],
+                        rate = 60;
+                    while (rate <= 200) {
+                        rates.push(rate);
+                        rate += 5;
+                    }
+                    app.value('rates', rates);
+                })();
+
+                function Controller(hours, rates, times) {
+                    var result = [],
+                        columns = [
+                            {
+                                field: "rate",
+                                title: "Rate",
+                                format: "{0:c}"
+                            }
+                        ],
+                        columnSet = false;
+                    angular.forEach(rates, function(rate) {
+                        var row = {
+                                rate: rate
+                            };
+                        angular.forEach(times, function(time) {
+                            angular.forEach(hours, function(hour) {
+                                row["val" + time.factor + "_" + hour] = time.factor * hour * rate;
+                                if (!columnSet) {
+                                    columns.push({
+                                    field: "val" + time.factor + "_" + hour,
+                                    title: time.time + " " + hour,
+                                    format: "{0:c}"
+                                    });
+                                }
+                            });
+                        });
+                        columnSet = true;
+                        result.push(row);
+                    });
+                    this.gridOptions = {
+                        dataSource: {
+                            data: result,
+                            pageSize: 10
+                        },
+                        sortable: true,
+                        pageable: true,
+                        pageSize: 10,
+                        columns: columns
+                    } 
+                }
+
+                app.controller('rateCtrl', ['hours', 'rates', 'times', Controller]);
+
+            })(angular.module("rateApp", ["kendo.directives"]));
+        </script>
+    </body>
+</html>
