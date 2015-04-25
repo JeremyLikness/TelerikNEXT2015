@@ -1,0 +1,142 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>Angular with Kendo UI Demo</title>
+    <link rel="stylesheet" href="kendo-ui-core/styles/kendo.common.min.css" />
+    <link rel="stylesheet" href="kendo-ui-core/styles/kendo.default.min.css" />
+    <link rel="stylesheet" href="content/bootstrap.min.css"/>
+
+    <script src="kendo-ui-core/js/jquery.min.js"></script>
+    <script src="kendo-ui-core/js/angular.min.js"></script>
+    <script src="kendo-ui-core/js/kendo.core.min.js"></script>
+    <script src="kendo-ui-core/js/kendo.ui.core.min.js"></script>
+    <script src="kendo-ui-core/js/kendo.data.min.js"></script> 
+    <script src="kendo-ui-core/js/kendo.numerictextbox.min.js"></script>
+    <script src="kendo-ui-core/js/kendo.slider.min.js"></script>
+    <script src="kendo-ui-core/js/kendo.datepicker.min.js"></script>
+    <script src="kendo-ui-core/js/kendo.angular.min.js"></script>
+</head>
+<body>
+    <div class="container" ng-app="kendoDemo">
+        <div class="row" ng-controller="demoCtrl as ctrl">
+            <div class="row">
+                <div class="h4">Your Information</div>
+                <hr class="divider"/>
+            </div>
+            <form class="form-horizontal" role="form">
+                <div class="row">&nbsp;</div>
+                <div class="row">
+                    <label class="control-label col-sm-2">Weight (lbs.)</label>
+                    <input kendo-numeric-text-box k-min="80" k-max="400" k-ng-model="ctrl.weight" class="col-sm-3"/>
+                    <div kendo-slider k-tick-placement="'none'" k-min="80" k-large-step="10" k-max="400" k-ng-model="ctrl.weight" class="col-sm-3"></div>
+                    <span class="col-sm-2"><strong>{{ctrl.weight}} lbs.</strong></span>
+                </div>
+                <div class="row">&nbsp;</div>
+                <div class="row">
+                    <label class="control-label col-sm-2">Height (in.)</label>
+                    <input kendo-numeric-text-box k-min="40" k-max="100" k-ng-model="ctrl.height" class="col-sm-3"/>
+                    <div kendo-slider k-min="40" k-tick-placement="'none'" k-large-step="6" k-max="100" k-ng-model="ctrl.height" class="col-sm-3"></div>
+                    <span class="col-sm-2"><strong>{{ctrl.height|height}}</strong></span>
+                </div>
+                <div class="row">&nbsp;</div>
+                <div class="row">
+                    <label class="control-label col-sm-2">Birthday</label>
+                    <input kendo-date-picker k-ng-model="ctrl.birthday" class="col-sm-3"/>
+                    <span class="col-sm-2"><strong>{{ctrl.birthday|age}} years old</strong></span>
+                </div>
+            </form>
+            <div class="row">
+                <div class="h4">Results</div>
+                <hr class="divider"/>
+                <p>Male Bmr: {{ctrl.maleBmr}} calories
+                <p>Female Bmr: {{ctrl.femaleBmr}} calories
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function (app) {
+
+            function calculateAge(birthday) {
+                var today = new Date();
+                var nowyear = today.getFullYear();
+                var nowmonth = today.getMonth();
+                var nowday = today.getDate();
+
+                var birthyear = birthday.getFullYear();
+                var birthmonth = birthday.getMonth();
+                var birthdate = birthday.getDate();
+
+                var age = nowyear - birthyear;
+                var agemonth = nowmonth - birthmonth;
+                var ageday = nowday - birthdate;
+
+                if (agemonth < 0 || (agemonth == 0 && ageday < 0)) {
+                    age = parseInt(age) - 1;
+                }
+
+                return age;
+            }
+
+            // Women - 655 + (4.35 x weight in pounds) + (4.7 x height in inches) - (4.7 x age in years)
+            function woman(weight, height, age) {
+                return Math.floor(655 + (4.35 * weight) + (4.7 * height) - (4.7 * age));
+            }
+
+            // Men - 66 + (6.23 x weight in pounds) + (12.7 x height in inches) - (6.8 x age in years )
+            function man(weight, height, age) {
+                return Math.floor(66 + (6.23 * weight) + (12.7 * height) - (6.8 * age));
+            }
+
+            function Controller() {
+                this.weight = 200;
+                this.height = 70;
+                this.birthday = new Date(1974, 8, 22);
+            }
+
+            Object.defineProperty(Controller.prototype, "maleBmr", {
+                enumerable: true,
+                configurable: false,
+                get: function() {
+                    return man(this.weight, this.height, calculateAge(this.birthday));
+                }
+            });
+
+            Object.defineProperty(Controller.prototype, "femaleBmr", {
+                enumerable: true,
+                configurable: false,
+                get: function () {
+                    return woman(this.weight, this.height, calculateAge(this.birthday));
+                }
+            });
+
+            app.controller("demoCtrl", Controller);
+
+            app.filter('height', function () {
+                return function (input) {
+                    var heightInches = Number(input), ft, result = '';
+                    ft = Math.floor(input/12);
+                    if (ft > 0) {
+                        result = ft + " ft. ";
+                    }
+                    heightInches -= ft * 12;
+                    if (heightInches >= 1) {
+                        result += (Math.floor(heightInches) + ' in.');
+                    }
+                    return result;
+                };
+            });
+
+            app.filter('age', function() {
+                return function(input) {
+                    return calculateAge(input);
+                };
+            });
+
+
+        })(angular.module("kendoDemo", ["kendo.directives"]));
+    </script>
+
+
+</body>
+</html>

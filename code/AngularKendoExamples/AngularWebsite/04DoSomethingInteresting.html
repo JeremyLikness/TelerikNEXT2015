@@ -1,0 +1,98 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Angular Example Step Four: Do Something Interesting</title>
+    <link rel="stylesheet" href="content/bootstrap.min.css" />
+</head>
+<body>
+    <script src="scripts/angular.js"></script>
+    <div ng-app="rateApp" class="container">
+        <div ng-if="false===true">Angular is not working.</div>
+        <div class="h2">Rates</div>
+        <hr />
+        <div class="table-responsive" ng-controller="rateCtrl as ctrl">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>&nbsp;</th>
+                        <th ng-repeat="time in ::ctrl.times" class="h3 text-center" colspan="3">{{::time.time}}</th>
+                    </tr>
+                    <tr>
+                        <th class="h3">Rate</th>
+                        <th ng-repeat="hour in ::ctrl.hourRow() track by $index" class="h4 text-center">{{::hour}}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="rate in ::ctrl.rates">
+                        <td class="h4 text-center">{{::rate|currency:undefined:0}}</td>
+                        <td ng-repeat="cost in ::ctrl.rows(rate)" class="text-center">{{::cost|currency:undefined:0}}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+
+        "use strict";
+
+        (function (app) {
+
+            app.value('hours', [40, 45, 50]);
+
+            app.value('times', [{
+                time: 'Weekly',
+                factor: 1
+            }, {
+                time: 'Monthly',
+                factor: 4
+            }, {
+                time: 'Yearly (48 Weeks)',
+                factor: 48
+            }]);
+
+            (function () {
+                var rates = [],
+                    rate = 60;
+                while (rate <= 200) {
+                    rates.push(rate);
+                    rate += 5;
+                }
+                app.value('rates', rates);
+            })();
+
+            function Controller(hours, rates, times) {
+                this.hours = hours;
+                this.rates = rates;
+                this.times = times;
+            }
+
+            angular.extend(Controller.prototype, {
+
+                hourRow: function () {
+                    var that = this,
+                        result = [];
+                    angular.forEach(this.times, function () {
+                        result = result.concat(that.hours);
+                    });
+                    return result;
+                },
+
+                rows: function (rate) {
+                    var that = this,
+                        result = [];
+                    angular.forEach(that.times, function (time) {
+                        angular.forEach(that.hours, function (hour) {
+                            result.push(time.factor * hour * rate);
+                        });
+                    });
+                    return result;
+                }
+            });
+
+            app.controller('rateCtrl', ['hours', 'rates', 'times', Controller]);
+
+        })(angular.module("rateApp", []));
+    </script>
+</body>
+</html>

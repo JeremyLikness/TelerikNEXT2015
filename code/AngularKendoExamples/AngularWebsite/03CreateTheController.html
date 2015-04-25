@@ -1,0 +1,60 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Angular Example Step Three: Create the Controller</title>
+    <link rel="stylesheet" href="content/bootstrap.min.css" />
+</head>
+<body>
+    <script src="scripts/angular.js"></script>
+    <div ng-app="rateApp" class="container">
+        <div ng-if="false===true">Angular is not working.</div>
+        <div class="h2">Rates</div>
+        <hr/>
+        <div class="row" ng-controller="rateCtrl as ctrl">
+            <div>{{ctrl.times|json}}</div>
+            <div>{{ctrl.hours|json}}</div>
+            <div>{{ctrl.rates|json}}</div>
+        </div>
+    </div>
+
+    <script>
+
+        "use strict";
+
+        (function (app) {
+
+            app.value('hours', [40, 45, 50]);
+
+            app.value('times', [{
+                time: 'Weekly',
+                factor: 1
+            }, {
+                time: 'Monthly',
+                factor: 4
+            }, {
+                time: 'Yearly (48 Weeks)',
+                factor: 48
+            }]);
+
+            (function () {
+                var rates = [],
+                    rate = 60;
+                while (rate <= 200) {
+                    rates.push(rate);
+                    rate += 5;
+                }
+                app.value('rates', rates);
+            })();
+
+            function Controller(hours, rates, times) {
+                this.hours = hours;
+                this.rates = rates;
+                this.times = times;
+            }
+
+            app.controller('rateCtrl', ['hours', 'rates', 'times', Controller]);
+
+        })(angular.module("rateApp", []));
+    </script>
+</body>
+</html>

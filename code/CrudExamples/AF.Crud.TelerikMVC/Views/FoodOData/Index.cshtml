@@ -1,0 +1,122 @@
+﻿@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="h1">Food OData</div>
+<div class="container">
+    <div id="foodGrid"></div>
+</div>
+<script>
+    $(document).ready(function() {
+
+        var grid = $("#foodGrid"),
+            baseUrl = 'http://localhost:7178/odata/FoodDescriptions',
+            dataSource = new kendo.data.DataSource({
+                batch: false,
+                serverPaging: true,
+                serverSorting: true,
+                serverFiltering: true,
+                pageSize: 10,
+                type: 'odata',
+                transport: {
+                    read: {
+                        async: false,
+                        dataType: 'json',
+                        url: baseUrl,
+                    },
+                    update: {
+                        type: 'Put',
+                        url: function(data) {
+                            return baseUrl + "('" + data.Number + "')";
+                        },
+                        dataType: 'json'
+                    },
+                    destroy: {
+                        url: function(data) {
+                            return baseUrl + "('" + data.Number + "')";
+                        },
+                        dataType: 'json'
+                    }
+                },
+                schema: {
+                    data: function(data) {
+                        return data.value;
+                    },
+                    total: function(data) {
+                        return data['odata.count'];
+                    },
+                    model: {
+                        id: "Number",
+                        fields: {
+                            Number: {type: "string"},
+                            ProteinFactor: { type: "number" },
+                            FatFactor: { type: "number" },
+                            CarbFactor: { type: "number" },
+                            SomeDate: { type: "date" }
+                        }
+                    }
+                },
+                requestStart: function() {
+                    kendo.ui.progress(grid, true);
+                },
+                requestEnd: function() {
+                    kendo.ui.progress(grid, false);
+                }
+            });
+
+        grid.kendoGrid({
+            sortable: true,
+            reorderable: true,
+            resizable: true,
+            pageable: true,
+            filterable: true,
+            batch: false,
+            editable: 'popup',
+            columns: [
+                {
+                    title: "Id",
+                    field: "Number",
+                    width: 15
+                },
+            {
+                title: "Name",
+                field: "Name",
+                width: 50
+            },
+                {
+                    title: "Description",
+                    field: "Description",
+                    width: 50
+                },
+
+                {
+                    title: "Pro",
+                    field: "ProteinFactor",
+                    width: 12
+                },
+                {
+                    title: "Fat",
+                    field: "FatFactor",
+                    width: 12
+                },
+                {
+                    title: "Carb",
+                    field: "CarbFactor",
+                    width: 12
+                },
+                {
+                    title: "SomeDate",
+                    field: "SomeDate",
+                    width: 20
+
+                },
+                { command: ['edit', 'destroy'], width: 40}
+            ],
+            dataSource: dataSource
+        });
+
+    });
+</script>
+
+

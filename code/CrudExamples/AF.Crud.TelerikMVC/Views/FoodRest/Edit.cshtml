@@ -1,0 +1,153 @@
+﻿
+@{
+    ViewBag.Title = "Edit";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Edit Food REST</h2>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <div class="h3 panel-title">Edit</div>
+    </div>
+    <div class="panel-body">
+        <form class="form-horizontal" id="editForm" role="form">
+            <div class="col-sm-6 form-group">
+                <label class="col-sm-4 control-label" for="foodId">Id:</label>
+                <div class="col-sm-8">
+                    <input class="form-control" type="number" name="foodId" disabled data-bind="value: Number" />
+                </div>
+            </div>
+            <div class="col-sm-6 form-group">
+                <label class="col-sm-4 control-label" for="name">Name:</label>
+                <div class="col-sm-8">
+                    <input type="text"
+                           required
+                           maxlength="60"
+                           name="name"
+                           class="form-control k-textbox"
+                           data-bind="value: Name, events: { change: change }" />
+                </div>
+            </div>
+            <div class="col-sm-6 form-group">
+                <label class="col-sm-4 control-label" for="description">Description:</label>
+                <div class="col-sm-8">
+                    <input type="text"
+                           required
+                           maxlength="200"
+                           name="description"
+                           class="form-control k-textbox"
+                           data-bind="value: Description, events: { change: change }" />
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-4 control-label" for="protein">Protein:</label>
+                <div class="col-sm-8">
+                    <input type="number"
+                           data-role="numerictextbox"
+                           data-step="0.1"
+                           name="protein"
+                           class="form-control"
+                           data-bind="value: ProteinFactor, events: {change: change}" />
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-4 control-label" for="fat">Fat:</label>
+                <div class="col-sm-8">
+                    <input type="number"
+                           data-role="numerictextbox"
+                           data-step="0.1"
+                           name="fat"
+                           class="form-control"
+                           data-bind="value: FatFactor, events: {change: change}" />
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-4 control-label" for="carbohydrate">Carbohydrate:</label>
+                <div class="col-sm-8">
+                    <input type="number"
+                           data-role="numerictextbox"
+                           data-step="0.1"
+                           name="carbohydrate"
+                           class="form-control"
+                           data-bind="value: CarbFactor, events: {change: change}" />
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-4 control-label" for="someDate">Some Date:</label>
+                <div class="col-sm-8">
+                    <input type="date"
+                           data-role="datetimepicker"
+                           name="someDate"
+                           required
+                           class="form-control"
+                           data-bind="value: SomeDate, events: {change: change}" />
+                </div>
+            </div>
+            <div class="col-sm-12 col-md-12 col-lg-12 form-group">
+                <button class="btn btn-primary k-button" data-bind="click: save, enabled: hasChanges">Update</button>
+                <a href="/Food">Cancel</a>
+            </div>
+
+        </form>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        var id = '@ViewBag.id',
+            editForm = $("#editForm"),
+            validator = editForm.kendoValidator().data("kendoValidator");;
+
+        kendo.culture("en-US");
+
+        function save(form, vm) {
+            var data;
+            if (!validator.validate()) {
+                alert("There are validation errors.");
+                return;
+            }
+            kendo.ui.progress(editForm, true);
+            data = vm.toJSON();
+            data.SomeDate = kendo.toString(data.SomeDate, "G");
+            $.ajax({
+                type: 'Put',
+                url: "http://localhost:7178/api/FoodDescriptionsApi/" + id,
+                dataType: 'json',
+                data: data,
+                success: function () {
+                    kendo.ui.progress(editForm, false);
+                    window.location.href = "/FoodRest/";
+                },
+                error: function (err) {
+                    kendo.ui.progress(editForm, false);
+                    alert('There was an error saving the food item: ' + err.responseText);
+                }
+            });
+        }
+
+        kendo.ui.progress(editForm, true);
+
+        $.ajax({
+            type: 'Get',
+            url: 'http://localhost:7178/api/FoodDescriptionsApi/' + id,
+            dataType: 'json',
+            success: function(data) {
+                data.hasChanges = false;
+                data.SomeDate = kendo.parseDate(data.SomeDate);
+                var vm = kendo.observable(data);
+                vm.change = function () {
+                    this.set("hasChanges", true);
+                    validator.validate();
+                }
+                vm.save = function (evt) {
+                    evt.preventDefault();
+                    save(editForm, vm);
+                };
+                kendo.bind(editForm, vm);
+                kendo.ui.progress(editForm, false);
+            }
+        });
+    });
+
+</script>
+
+

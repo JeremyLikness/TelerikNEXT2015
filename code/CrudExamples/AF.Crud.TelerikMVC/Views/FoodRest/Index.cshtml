@@ -1,0 +1,111 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="h1">Food REST</div>
+<div class="container">
+    <div id="foodGrid"></div>
+</div>
+<script>
+    $(document).ready(function() {
+
+        window.editFoodItem = function(itemId) {
+            window.location = "/FoodRest/Edit/" + itemId;
+        }
+
+        var grid = $("#foodGrid"),
+            dataSource = new kendo.data.DataSource({
+                serverPaging: true,
+                serverSorting: true,
+                serverFiltering: true,
+                pageSize: 10,
+                type: 'aspnetmvc-ajax',
+                transport: {
+                    read: {
+                        type: 'post',
+                        dataType: 'json',
+                        url: '/FoodRest/FoodDescriptions',
+                    }
+                },
+                schema: {
+                    model: {
+                        id: "Id",
+                        fields: {
+                            ProteinFactor: { type: "number" },
+                            FatFactor: { type: "number" },
+                            CarbFactor: { type: "number" },
+                            SomeDate: { type: "date" }
+                        }
+                    },
+                    data: function(e) {
+                        return e.Data;
+                    },
+                    total: function(e) {
+                        return e.Total;
+                    }
+                },
+                requestStart: function() {
+                    kendo.ui.progress(grid, true);
+                },
+                requestEnd: function() {
+                    kendo.ui.progress(grid, false);
+                }
+            });
+
+        grid.kendoGrid({
+            sortable: true,
+            reorderable: true,
+            resizable: true,
+            pageable: true,
+            filterable: true,
+            autoBind: true,
+            customBinding: true,
+            columns: [
+                {
+                    title: "Id",
+                    field: "Number",
+                    width: 15,
+                    template: "<a class='btn btn-link' onclick='editFoodItem(\"#=data.Number#\");return false;'>#=data.Number#</a>"
+                },
+            {
+                title: "Name",
+                field: "Name",
+                width: 50
+            },
+                {
+                    title: "Description",
+                    field: "Description",
+                    width: 50
+                },
+
+                {
+                    title: "Pro",
+                    field: "ProteinFactor",
+                    width: 12
+                },
+                {
+                    title: "Fat",
+                    field: "FatFactor",
+                    width: 12
+                },
+                {
+                    title: "Carb",
+                    field: "CarbFactor",
+                    width: 12
+                },
+                {
+                    title: "SomeDate",
+                    field: "SomeDate",
+                    width: 20
+                    
+                }
+            ],
+            dataSource: dataSource
+        });
+
+    });
+</script>
+
+
